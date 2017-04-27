@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// Unit输入控制
+/// </summary>
 [RequireComponent(typeof(UnitMotor))]
 public class UnitController : MonoBehaviour
 {
@@ -29,13 +32,13 @@ public class UnitController : MonoBehaviour
 		// change mouse offset to target forward dir
 		// pivot to screen center
 		// calc offset
+		_mousePos.x = Mathf.Clamp(_mousePos.x, 0, Screen.width);
+		_mousePos.y = Mathf.Clamp(_mousePos.y, 0, Screen.height);
 		Ray r = Camera.main.ScreenPointToRay(_mousePos);
 		float val = _cam.OffsetDistance * 2;
 		_targetPt = _cam.transform.position + r.direction*val;
 
 		Vector3 dirToGo = (_targetPt - transform.position).normalized;
-
-//		Debug.DrawLine(constPt, _mousePos, Color.white, 0.2f);
 
 		// speedup motor
 		_cam.SetTargetForward(r.direction);
