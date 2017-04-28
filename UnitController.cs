@@ -12,7 +12,6 @@ public class UnitController : MonoBehaviour
 
 	[SerializeField] private Vector3 _mousePos;
 
-	private Vector3 _constPt;
 
 	private FollowUpCam _cam;
 
@@ -22,7 +21,6 @@ public class UnitController : MonoBehaviour
 	{
 		_motor = GetComponent<UnitMotor>();
 		_cam = Camera.main.GetComponent<FollowUpCam>();
-		_constPt = Camera.main.ViewportToScreenPoint(new Vector3(0.5f, 0.5f, -2));
 	}
 
 	// Update is called once per frame
