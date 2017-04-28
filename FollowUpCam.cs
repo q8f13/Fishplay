@@ -9,6 +9,7 @@ using UnityEngine;
 public class FollowUpCam : MonoBehaviour
 {
 	public Transform Target;
+	public float FollowSpeed = 5.0f;
 
 	private Camera _cam;
 
@@ -34,7 +35,7 @@ public class FollowUpCam : MonoBehaviour
 		if (_dir != default (Vector3))
 		{
 			_cam.transform.rotation = Quaternion.Slerp(_cam.transform.rotation, Quaternion.LookRotation(_dir, _cam.transform.up),
-				Time.deltaTime*5.0f);
+				Time.fixedDeltaTime*FollowSpeed);
 		}
 //			_cam.transform.forward = Vector3.Slerp(_cam.transform.forward, _dir, Time.deltaTime*5.0f);
 	}

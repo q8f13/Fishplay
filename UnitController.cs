@@ -35,7 +35,7 @@ public class UnitController : MonoBehaviour
 		_mousePos.x = Mathf.Clamp(_mousePos.x, 0, Screen.width);
 		_mousePos.y = Mathf.Clamp(_mousePos.y, 0, Screen.height);
 		Ray r = Camera.main.ScreenPointToRay(_mousePos);
-		float val = _cam.OffsetDistance * 2;
+		float val = _cam.OffsetDistance * 2.0f;
 		_targetPt = _cam.transform.position + r.direction*val;
 
 		Vector3 dirToGo = (_targetPt - transform.position).normalized;
@@ -51,7 +51,8 @@ public class UnitController : MonoBehaviour
 		if (_cam == null)
 			return;
 
-//		Gizmos.color = Color.white;
+		Gizmos.color = Color.white;
+		Gizmos.DrawWireSphere(_targetPt, 0.2f);
 //		Ray r = Camera.main.ScreenPointToRay(_mousePos);
 //		float val = _cam.OffsetDistance * 4;
 //		Gizmos.DrawRay(Camera.main.transform.position, r.direction * val);
