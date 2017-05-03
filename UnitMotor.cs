@@ -8,6 +8,8 @@ using UnityEngine;
 public class UnitMotor : MonoBehaviour
 {
 	public float RotationSpeed = 1f;
+	public float RotationSpeedMin = 0.5f;
+
 	public float RollSpeed = 1f;
 
 	private Rigidbody _rig;
@@ -22,10 +24,18 @@ public class UnitMotor : MonoBehaviour
 
 	private float _startDrag = 0.0f;
 
+	// TODO: 临时值
+	private float _boosterForce = 50.0f;
+	private float _maxSpeedWithBoost = 100.0f;
+
+	[SerializeField] private float _rigSpeed;
+
 	[SerializeField]
 	private float _euler_x_offset;
 
 	private FollowUpCam _cam;
+
+	public float SpeedRate { get { return _rigSpeed/_maxSpeedWithBoost; } }
 
 	// Use this for initialization
 	void Start ()
@@ -47,7 +57,10 @@ public class UnitMotor : MonoBehaviour
 			_rig.drag = Mathf.Lerp(_startDrag, 1.0f, -yInput);
 		}
 
-		_rig.AddRelativeForce(0, 0, throttle*enginePower);
+		_rigSpeed = _rig.velocity.magnitude;
+		if(_rigSpeed < _maxSpeedWithBoost)
+			_rig.AddRelativeForce(0, 0, throttle*enginePower);
+
 		throttle *= (1.0f - (Time.fixedDeltaTime*throttleSpeed/4.0f));
 
 		// 计算本地坐标系横向的偏移量。用于roll角度
@@ -60,10 +73,25 @@ public class UnitMotor : MonoBehaviour
 		Quaternion targetQuat = Quaternion.LookRotation(_currentForwardGoing, Camera.main.transform.up);
 
 		targetQuat = rollQuat*targetQuat;
+
+		float rotateSpeedInterpolated = Mathf.Lerp(RotationSpeedMin, RotationSpeed, (1.0f - SpeedRate));
+
+//		_rig.rotation =
+//			Quaternion.Slerp(_rig.rotation,
+//				targetQuat,
+//				Time.fixedDeltaTime*RotationSpeed);
 		_rig.rotation =
 			Quaternion.Slerp(_rig.rotation,
 				targetQuat,
-				Time.fixedDeltaTime*RotationSpeed);
+				Time.fixedDeltaTime*rotateSpeedInterpolated);
+	}
+
+	public void BoostUp(bool on)
+	{
+		if(on && _rigSpeed < _maxSpeedWithBoost)
+		{
+			_rig.AddRelativeForce(0,0,_boosterForce * enginePower * Time.fixedDeltaTime, ForceMode.Impulse);
+		}
 	}
 
 	public void ChangeForward(Vector3 fwd)

@@ -12,15 +12,18 @@ public class UnitController : MonoBehaviour
 
 	[SerializeField] private Vector3 _mousePos;
 
-
 	private FollowUpCam _cam;
 
 	private Vector3 _targetPt;
+
+	private ParticleChildControl _ps;
 
 	void Start()
 	{
 		_motor = GetComponent<UnitMotor>();
 		_cam = Camera.main.GetComponent<FollowUpCam>();
+		_ps = GetComponent<ParticleChildControl>();
+		_ps.Toggle(false);
 	}
 
 	// Update is called once per frame
@@ -42,6 +45,9 @@ public class UnitController : MonoBehaviour
 		_cam.SetTargetForward(r.direction);
 		_motor.ChangeForward(dirToGo);
 		_motor.SpeedUp(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+		bool boostUpOn = Input.GetKey(KeyCode.LeftShift);
+		_ps.Toggle(boostUpOn);
+		_motor.BoostUp(boostUpOn);
 	}
 
 	void OnDrawGizmos()
