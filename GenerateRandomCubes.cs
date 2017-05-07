@@ -11,6 +11,7 @@ public class GenerateRandomCubes : MonoBehaviour
 	public int Count = 50;
 	public int RangeRadius = 100;
 	public bool ColliderOn = false;
+	public float ScaleMax = 20.0f;
 
 	void Start ()
 	{
@@ -20,8 +21,8 @@ public class GenerateRandomCubes : MonoBehaviour
 			GameObject g = GameObject.CreatePrimitive(PrimitiveType.Cube);
 			g.transform.parent = transform;
 			g.transform.rotation = Quaternion.Euler(RandomDegree(), RandomDegree(), RandomDegree());
-			g.transform.localScale = Random.value*Vector3.one;
-			g.transform.position = RandomEulerAngle()*Random.value*RangeRadius;
+			g.transform.localScale = Random.value*Vector3.one * ScaleMax;
+			g.transform.position = RandomRange(-RangeRadius, RangeRadius);
 			g.GetComponent<BoxCollider>().enabled = ColliderOn;
 			count--;
 		}
@@ -35,5 +36,10 @@ public class GenerateRandomCubes : MonoBehaviour
 	Vector3 RandomEulerAngle()
 	{
 		return new Vector3(Random.value, Random.value, Random.value);
+	}
+
+	Vector3 RandomRange(float min, float max)
+	{
+		return new Vector3(Random.Range(min, max), Random.Range(min, max), Random.Range(min, max));
 	}
 }
