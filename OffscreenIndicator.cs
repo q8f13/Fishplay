@@ -24,6 +24,11 @@ public class OffscreenIndicator : MonoBehaviour
 	{
 		_indicators = InitIndicators(_indicatorCount);
 		_indicatorsOn = new Image[_indicators.Length];
+	}
+
+	[ContextMenu("RefreshTargets")]
+	public void RefreshTarget()
+	{
 		GetAllTargetByTag("target");
 	}
 

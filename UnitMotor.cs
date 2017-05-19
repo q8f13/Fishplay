@@ -33,7 +33,7 @@ public class UnitMotor : MonoBehaviour
 	[SerializeField]
 	private float _euler_x_offset;
 
-	private FollowUpCam _cam;
+//	private FollowUpCam _cam;
 
 	public float SpeedRate { get { return _rigSpeed/_maxSpeedWithBoost; } }
 
@@ -42,7 +42,7 @@ public class UnitMotor : MonoBehaviour
 	{
 		_rig = GetComponent<Rigidbody>();
 		_startDrag = _rig.drag;
-		_cam = Camera.main.GetComponent<FollowUpCam>();
+//		_cam = Camera.main.GetComponent<FollowUpCam>();
 	}
 
 	public void SpeedUp(float xInput, float yInput)
