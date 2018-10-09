@@ -20,8 +20,6 @@ public class BallInput : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if(_clock.Scale < 1.0f)
-			return;
 
 		if(Input.GetKeyUp(KeyCode.W))
 			InputForceAndDisplay(KeyCode.W, Vector3.up);
@@ -35,7 +33,9 @@ public class BallInput : MonoBehaviour {
 
 	void InputForceAndDisplay(KeyCode kcode, Vector3 direction)
 	{
-		_rig.AddForce(direction * ForceScale, ForceMode.Impulse);
 		Console.text += kcode.ToString() + "\n";
+		if(_clock.Scale < 1.0f)
+			return;
+		_rig.AddForce(direction * ForceScale, ForceMode.Impulse);
 	}
 }
