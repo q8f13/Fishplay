@@ -21,4 +21,9 @@ MonoBehaviour:
   MissileSet:
     ExplositionRange: 0
     SpreadSpeed: 0
-  Sockets: []
+  Sockets:
+  - Field: 1
+    PluginOnSet:
+      Name: NoName
+      Description: NoDescription
+      FieldCompatable: 0
