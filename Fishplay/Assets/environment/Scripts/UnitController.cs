@@ -46,7 +46,9 @@ public class UnitController : MonoBehaviour
 		_motor.ChangeForward(dirToGo);
 		_motor.SpeedUp(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
 		bool boostUpOn = Input.GetKey(KeyCode.LeftShift);
-		_ps.Toggle(boostUpOn);
+		// _ps.Toggle(boostUpOn);
+		if(Input.GetKey(KeyCode.LeftShift))
+			_ps.Emit();
 		_motor.BoostUp(boostUpOn);
 	}
 

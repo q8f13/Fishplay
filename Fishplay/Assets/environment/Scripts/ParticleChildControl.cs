@@ -9,11 +9,22 @@ public class ParticleChildControl : MonoBehaviour
 
 	public bool IsOn { get { return _ps.isPlaying; } }
 
+	private void Start() {
+		ParticleSystem.EmissionModule em = _ps.emission;
+		em.enabled = false;
+		// _ps.emission.enabled = false;
+	}
+
 	public void Toggle(bool on)
 	{
 		if(on)
 			_ps.Play();
 		else
 			_ps.Stop();
+	}
+
+	public void Emit()
+	{
+		_ps.Emit(5);
 	}
 }

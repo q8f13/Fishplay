@@ -431,8 +431,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 086d6c830c686c64087ddad22c457942, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  WeaponStatPad: {fileID: 0}
-  DebugOnlyDataAsset: {fileID: 0}
+  WeaponStatPad: {fileID: 2087028349}
+  DebugOnlyDataAsset: {fileID: 11400000, guid: 0c0fc9592bdbe084ebc8168a728ce659, type: 2}
 --- !u!1 &1913970191
 GameObject:
   m_ObjectHideFlags: 0
@@ -562,8 +562,8 @@ MonoBehaviour:
     m_Alignment: 0
     m_AlignByGeometry: 0
     m_RichText: 1
-    m_HorizontalOverflow: 0
-    m_VerticalOverflow: 0
+    m_HorizontalOverflow: 1
+    m_VerticalOverflow: 1
     m_LineSpacing: 1
   m_Text: New Text
 --- !u!222 &2087028350
