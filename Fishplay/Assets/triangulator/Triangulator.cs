@@ -17,7 +17,7 @@ public class Triangulator : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		int count = 3;
+		int count = 30;
 		_p = new List<Point>();
 
 		List<Vector3> points = new List<Vector3>();
@@ -111,17 +111,17 @@ public class Triangulator : MonoBehaviour {
 			return tempTriangleList;
 		}
 
+		// 创建超级三角形来包裹候选点
 		Vector3[] supert = GetSuperTriangle(points);
-
-		// PrintPoints(points);
-		// List<Triangle> triangleList = new List<Triangle>();
-
 		tempTriangleList.Add(new Triangle(supert[0], supert[1], supert[2]));
 
+		// 开始遍历候选点
 		foreach(Vector3 p in points)
 		{
+			// 用来暂存边信息，方便插入点时创建三角形
 			List<Edge> edgeBuffer = new List<Edge>();
-			// List<Vector3> vectorBuffer = new List<Vector3>();
+
+			// 确定当前点在哪个三角形里。从已有三角形列表中干掉，并缓存其边信息
 			for(int i=tempTriangleList.Count - 1;i>=0;i--)
 			{
 				if(i > tempTriangleList.Count - 1)
@@ -137,7 +137,7 @@ public class Triangulator : MonoBehaviour {
 				}
 			}
 
-			// remove duplicate edge
+			// remove duplicate edge（去重）
 			for(int m=edgeBuffer.Count - 1;m>=0;m--)
 			{
 				for(int n=edgeBuffer.Count - 1;n>=0;n--)
@@ -155,14 +155,17 @@ public class Triangulator : MonoBehaviour {
 				}
 			}
 
-			// connect p to every pt from tris
+			// 通过缓存的边信息创建新的三角形
 			List<Triangle> new_tris = new List<Triangle>();
 			foreach(Edge ed in edgeBuffer)
 			{
 				new_tris.Add(new Triangle(ed.A, ed.B, p));
 			}
 
-			// TODO: 这里需要针对新形成的三角形们做一下LOP
+			// 这里需要针对新形成的三角形们做一下局部优化(LOP)
+			// 实际上就是在新创建的三角形列表里找共边的三角形，并对两个三角形分别做外接圆检测看第四点是否在圆内
+			// 如果都在的说明不是delauney角，需要换边(edge-flip)
+			// 网上各种博客就没找到这个步骤的实现例子。在这只能先丑着了
 			List<Triangle> new_tris_addition = new List<Triangle>();
 			for(int m=new_tris.Count - 1;m>=0;m--)
 			{
@@ -178,7 +181,7 @@ public class Triangulator : MonoBehaviour {
 					Edge share = new_tris[m].ShareEdge(new_tris[n]);
 					if(share == null)
 						continue;
-					if(!first_in_circle_check && !second_in_circle_check)
+					if(first_in_circle_check && second_in_circle_check)
 					{
 						// need to flip edge
 						List<Vector3> pt_others = new List<Vector3>();
@@ -202,6 +205,7 @@ public class Triangulator : MonoBehaviour {
 			tempTriangleList.AddRange(new_tris.Concat(new_tris_addition));
 		}
 
+		// 去掉和超级三角形几个顶点相关的三角形
 		List<Triangle> allin = tempTriangleList;
 		for(int t=allin.Count - 1;t>=0;t--)
 		{
@@ -213,6 +217,7 @@ public class Triangulator : MonoBehaviour {
 /* 				if(pt == supert[0]
 					|| pt == supert[1]
 					|| pt == supert[2]) */
+				// 这里留一个可选做法，防止过程中顶点有其他逻辑影响精度
 				if(Vector3.Distance(pt, supert[0]) < 0.01f
 				|| Vector3.Distance(pt, supert[1]) < 0.01f
 				|| Vector3.Distance(pt, supert[2]) < 0.01f)
@@ -223,7 +228,6 @@ public class Triangulator : MonoBehaviour {
 			}
 		}
 
-		// return msh;
 		return allin;
 	}
 
