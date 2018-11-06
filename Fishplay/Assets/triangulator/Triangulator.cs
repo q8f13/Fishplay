@@ -17,7 +17,7 @@ public class Triangulator : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		int count = 3;
+		int count = 10;
 		_p = new List<Point>();
 
 		List<Vector3> points = new List<Vector3>();
@@ -41,7 +41,7 @@ public class Triangulator : MonoBehaviour {
 		List<Triangle> tris = TriangulatorBowyerWatson(points);
 		for(int i=0;i<tris.Count;i++)
 		{
-			tris[i].DrawGizmo(UnityEngine.Random.ColorHSV(), 99.0f);
+			tris[i].DrawGizmo(Color.white, 99.0f);
 		}
 
 		// Test_CenterFromThreePoint();
@@ -103,11 +103,12 @@ public class Triangulator : MonoBehaviour {
 	{
 		Mesh msh = new Mesh();
 
-		points = new List<Vector3>(points.OrderBy(x=>x.x));
+		// points = new List<Vector3>(points.OrderBy(x=>x.x));
 
 		Vector3[] supert = GetSuperTriangle(points);
+
 		// PrintPoints(points);
-		List<Triangle> triangleList = new List<Triangle>();
+		// List<Triangle> triangleList = new List<Triangle>();
 		List<Triangle> tempTriangleList = new List<Triangle>();
 
 		tempTriangleList.Add(new Triangle(supert[0], supert[1], supert[2]));
@@ -115,64 +116,101 @@ public class Triangulator : MonoBehaviour {
 		foreach(Vector3 p in points)
 		{
 			List<Edge> edgeBuffer = new List<Edge>();
-			for(int i=0;i<tempTriangleList.Count;i++)
+			// List<Vector3> vectorBuffer = new List<Vector3>();
+			for(int i=tempTriangleList.Count - 1;i>=0;i--)
 			{
-				Triangle tri = tempTriangleList[i];
-				if(!tri.Contains(p))
-				{
-					if(p.x > tri.GetCenter().x)
-					{
-						triangleList.Add(tri);
-						tempTriangleList.Remove(tri);
-					}
-					else
-					{
-						// keep tri in temp list
-						Debug.Log("foo");
-					}
+				if(i > tempTriangleList.Count - 1)
 					continue;
-				}
-				else
+				Triangle tri = tempTriangleList[i];
+				if(tri.Contains(p))
 				{
-					// not delauney tri
 					edgeBuffer.Add(new Edge(tri.A, tri.B));
 					edgeBuffer.Add(new Edge(tri.B, tri.C));
 					edgeBuffer.Add(new Edge(tri.A, tri.C));
+
 					tempTriangleList.Remove(tri);
 				}
 			}
 
-			// remove dupliate edge in buffer
-			for(int m=0;m<edgeBuffer.Count;m++)
+			// remove duplicate edge
+			for(int m=edgeBuffer.Count - 1;m>=0;m--)
 			{
-				for(int n=0;n<edgeBuffer.Count;n++)
+				for(int n=edgeBuffer.Count - 1;n>=0;n--)
 				{
 					if(m==n)
 						continue;
+					if(m > edgeBuffer.Count - 1 || n > edgeBuffer.Count - 1)
+						continue;
 					if(edgeBuffer[m].SameWith(edgeBuffer[n]))
-						edgeBuffer.Remove(edgeBuffer[n]);
+					{
+						edgeBuffer.RemoveAt(m);
+						edgeBuffer.RemoveAt(n);
+						break;
+					}
 				}
 			}
 
-			// form new tri and push into temp list
-			foreach(Edge e in edgeBuffer)
+			// connect p to every pt from tris
+			List<Triangle> new_tris = new List<Triangle>();
+			foreach(Edge ed in edgeBuffer)
 			{
-				Triangle newt = new Triangle(e.A, e.B, p); 
-				tempTriangleList.Add(newt);
+				new_tris.Add(new Triangle(ed.A, ed.B, p));
 			}
 
-			// TODO: 这里需要做一下LOP优化
+			// TODO: 这里需要针对新形成的三角形们做一下LOP
+			List<Triangle> new_tris_addition = new List<Triangle>();
+			for(int m=new_tris.Count - 1;m>=0;m--)
+			{
+				for(int n=new_tris.Count - 1;n>=0;n--)
+				{
+					if(m==n)
+						continue;
+					if(m > new_tris.Count - 1 || n > new_tris.Count - 1)
+						continue;
+					List<Vector3> pt_in_two_tris = new List<Vector3>(new_tris[m].Points.Concat(new_tris[n].Points).Distinct());
+					bool first_in_circle_check = new_tris[m].Contains(ExtractOtherPoint(pt_in_two_tris, new_tris[m]));
+					bool second_in_circle_check = new_tris[n].Contains(ExtractOtherPoint(pt_in_two_tris, new_tris[n]));
+					Edge share = new_tris[m].ShareEdge(new_tris[n]);
+					if(share == null)
+						continue;
+					if(!first_in_circle_check && !second_in_circle_check)
+					{
+						// need to flip edge
+						List<Vector3> pt_others = new List<Vector3>();
+						foreach(Vector3 ppp in pt_in_two_tris)
+						{
+							if(share.A != ppp && share.B != ppp)
+							{
+								pt_others.Add(ppp);
+							}
+						}
+
+						new_tris_addition.Add(new Triangle(pt_others[0],share.A, share.B));
+						new_tris_addition.Add(new Triangle(pt_others[1],share.A, share.B));
+						new_tris.RemoveAt(m);
+						new_tris.RemoveAt(n);
+						break;
+					}
+				}
+			}
+
+			tempTriangleList.AddRange(new_tris.Concat(new_tris_addition));
 		}
 
-		List<Triangle> allin = new List<Triangle>(triangleList.Concat(tempTriangleList.ToArray()));
-		for(int t=0;t<allin.Count;t++)
+		List<Triangle> allin = tempTriangleList;
+		for(int t=allin.Count - 1;t>=0;t--)
 		{
+			if(t > allin.Count - 1)
+				continue;
 			Triangle tri = allin[t];
 			foreach(Vector3 pt in tri.Points)
 			{
-				if(pt == supert[0]
+/* 				if(pt == supert[0]
 					|| pt == supert[1]
-					|| pt == supert[2])
+					|| pt == supert[2]) */
+				if(Vector3.Distance(pt, supert[0]) < 0.01f
+				|| Vector3.Distance(pt, supert[1]) < 0.01f
+				|| Vector3.Distance(pt, supert[2]) < 0.01f)
 				{
 					allin.Remove(tri);
 					break;
@@ -184,30 +222,20 @@ public class Triangulator : MonoBehaviour {
 		return allin;
 	}
 
+	Vector3 ExtractOtherPoint(List<Vector3> points, Triangle tri)
+	{
+		foreach(Vector3 p in points)
+		{
+			if(!tri.Points.Contains(p))
+				return p;
+		}
+
+		return default(Vector3);
+	}
+
 	public Mesh TriangulatorPointsDivideAndConquer(List<Point> points)
 	{
-		Mesh m = new Mesh();
-
-		// Debug.Log(string.Format("before: {0}", points));
-		PrintPoints(points);
-
-		points.Sort();
-
-/* 		points = new List<Vector3>(points.OrderBy(m,n=>
-		{
-			if(m.x == n.x)
-				m.x;
-			else
-				x.y;
-		})); */
-
-		PrintPoints(points);
-
-		_groups = new List<Point[]>();
-
-		DivideHalfs(points, ref _groups);
-
-		return m;
+		throw new NotImplementedException();
 	}
 
 	/// <summary>
@@ -358,19 +386,27 @@ public class Triangle
 		return _radius;
 	}
 
-	public bool ShareEdge(Triangle tri)
+	public Edge ShareEdge(Triangle tri)
 	{
 		int count = 0;
-		foreach(Vector3 p in this.Points)
+		Vector3[] shared_points = new Vector3[2];
+		foreach(Vector3 pa in this.Points)
 		{
-			foreach(Vector3 pt in tri.Points)
+			foreach(Vector3 pb in tri.Points)
 			{
-				if(p == pt)
+				if(pa == pb)
+				{
+					shared_points[count] = pb;
 					count++;
+				}
 			}
 		}
 
-		return count >= 2;
+		if(shared_points[0] == default(Vector3)
+			|| shared_points[1] == default(Vector3))
+			return null;
+
+		return new Edge(shared_points[0], shared_points[1]);
 	}
 
 	public bool Contains(Vector3 p)
@@ -400,13 +436,13 @@ public class Triangle
 		Vector3 pp_center = m12 + pp12 * t;
 		center = Vector3.ProjectOnPlane(pp_center, normal);
 
-		Debug.DrawLine(A, B, Color.red, 99.0f);
+/* 		Debug.DrawLine(A, B, Color.red, 99.0f);
 		Debug.DrawLine(B, C, Color.red, 99.0f);
-		Debug.DrawLine(A, C, Color.red, 99.0f);
+		Debug.DrawLine(A, C, Color.red, 99.0f); */
 /* 		Debug.DrawRay(m12, pp12, Color.red, 99.0f);
 		Debug.DrawRay(m13, pp13, Color.red, 99.0f); */
 		// Debug.DrawRay(pp_center, normal, Color.green, 99.0f);
-		Debug.DrawRay(center, normal, Color.green, 99.0f);
+		// Debug.DrawRay(center, normal, Color.green, 99.0f);
 
 		_center = center;
 		return _center;
