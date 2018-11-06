@@ -17,17 +17,52 @@ public class Triangulator : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		int count = 10;
+		int count = 3;
 		_p = new List<Point>();
+
+		List<Vector3> points = new List<Vector3>();
+
 		while(count > 0)
 		{
 			Vector3 n = UnityEngine.Random.insideUnitSphere * UnityEngine.Random.Range(1,5);
 			n.y = 0;
 			_p.Add(new Point(n));
+			points.Add(n);
 			count--;
 		}
 
-		TriangulatorPoints(_p);
+/* 		Vector3[] supert = GetSuperTriangle(_p);
+		Debug.DrawLine(supert[2], supert[0], Color.green,99);
+		Debug.DrawLine(supert[0], supert[1], Color.green,99);
+		Debug.DrawLine(supert[1], supert[2], Color.green,99);
+ */
+		// TriangulatorPoints(_p);
+
+		List<Triangle> tris = TriangulatorBowyerWatson(points);
+		for(int i=0;i<tris.Count;i++)
+		{
+			tris[i].DrawGizmo(UnityEngine.Random.ColorHSV(), 99.0f);
+		}
+
+		// Test_CenterFromThreePoint();
+	}
+
+	void Test_CenterFromThreePoint()
+	{
+		Vector3 p1 = new Vector3(1.0f, 0.0f, 0.0f);
+		Vector3 p2 = new Vector3(2.0f, 0.0f, 0.0f);
+		Vector3 p3 = new Vector3(3.0f, 0.5f, 1.0f);
+
+		Vector3 t = GetCircleCenter(p1,p2,p3);
+		Vector3 normal = Vector3.Cross(p2 - p1, p3 - p1);
+		float r = (t-p1).magnitude;
+
+		int count = 360;
+		while(count > 0)
+		{
+			Debug.DrawRay(t,  Quaternion.AngleAxis(count, normal) * (p2 - p1).normalized * r, Color.magenta, 99);
+			count--;
+		}
 	}
 
 	// show points
@@ -55,16 +90,101 @@ public class Triangulator : MonoBehaviour {
 		}
 
 		Gizmos.color = Color.white;
-		for(int n=0;n<_groups.Count;n++)
+/* 		for(int n=0;n<_groups.Count;n++)
 		{
 			Point[] ps = _groups[n];
 			for(int i=0;i< ps.Length - 1;i++)
 				Gizmos.DrawLine(ps[i].Pos, ps[i+1].Pos);
 			Gizmos.DrawLine(ps[ps.Length - 1].Pos, ps[0].Pos);
-		}
+		} */
 	}
 
-	public Mesh TriangulatorPoints(List<Point> points)
+	public List<Triangle> TriangulatorBowyerWatson(List<Vector3> points)
+	{
+		Mesh msh = new Mesh();
+
+		points = new List<Vector3>(points.OrderBy(x=>x.x));
+
+		Vector3[] supert = GetSuperTriangle(points);
+		// PrintPoints(points);
+		List<Triangle> triangleList = new List<Triangle>();
+		List<Triangle> tempTriangleList = new List<Triangle>();
+
+		tempTriangleList.Add(new Triangle(supert[0], supert[1], supert[2]));
+
+		foreach(Vector3 p in points)
+		{
+			List<Edge> edgeBuffer = new List<Edge>();
+			for(int i=0;i<tempTriangleList.Count;i++)
+			{
+				Triangle tri = tempTriangleList[i];
+				if(!tri.Contains(p))
+				{
+					if(p.x > tri.GetCenter().x)
+					{
+						triangleList.Add(tri);
+						tempTriangleList.Remove(tri);
+					}
+					else
+					{
+						// keep tri in temp list
+						Debug.Log("foo");
+					}
+					continue;
+				}
+				else
+				{
+					// not delauney tri
+					edgeBuffer.Add(new Edge(tri.A, tri.B));
+					edgeBuffer.Add(new Edge(tri.B, tri.C));
+					edgeBuffer.Add(new Edge(tri.A, tri.C));
+					tempTriangleList.Remove(tri);
+				}
+			}
+
+			// remove dupliate edge in buffer
+			for(int m=0;m<edgeBuffer.Count;m++)
+			{
+				for(int n=0;n<edgeBuffer.Count;n++)
+				{
+					if(m==n)
+						continue;
+					if(edgeBuffer[m].SameWith(edgeBuffer[n]))
+						edgeBuffer.Remove(edgeBuffer[n]);
+				}
+			}
+
+			// form new tri and push into temp list
+			foreach(Edge e in edgeBuffer)
+			{
+				Triangle newt = new Triangle(e.A, e.B, p); 
+				tempTriangleList.Add(newt);
+			}
+
+			// TODO: 这里需要做一下LOP优化
+		}
+
+		List<Triangle> allin = new List<Triangle>(triangleList.Concat(tempTriangleList.ToArray()));
+		for(int t=0;t<allin.Count;t++)
+		{
+			Triangle tri = allin[t];
+			foreach(Vector3 pt in tri.Points)
+			{
+				if(pt == supert[0]
+					|| pt == supert[1]
+					|| pt == supert[2])
+				{
+					allin.Remove(tri);
+					break;
+				}
+			}
+		}
+
+		// return msh;
+		return allin;
+	}
+
+	public Mesh TriangulatorPointsDivideAndConquer(List<Point> points)
 	{
 		Mesh m = new Mesh();
 
@@ -110,6 +230,75 @@ public class Triangulator : MonoBehaviour {
 			group.Add(points.ToArray());
 		}
 	}
+
+	public static Vector3 GetCircleCenter(Vector3 p1, Vector3 p2, Vector3 p3)
+	{
+		Vector3 center = Vector3.zero;
+		Vector3 normal = Vector3.Cross(p1 - p2, p1-p3);
+
+		Vector3 m12 = (p1 + p2)/2;
+		Vector3 m13 = (p1 + p3)/2;
+
+		Vector3 pp12 = Vector3.Cross((p2-p1),normal);
+		Vector3 pp13 = Vector3.Cross((p3-p1),normal);
+
+		// Debug.DrawRay()
+		Vector3 two_direction_cross = Vector3.Cross(pp12, pp13);
+		float t = Vector3.Dot(Vector3.Cross((m13 - m12), pp13) , two_direction_cross) / two_direction_cross.sqrMagnitude;
+
+		// Vector3 pp_center = Vector3.Cross(m12 + pp12, m13 + pp13);
+		Vector3 pp_center = m12 + pp12 * t;
+		center = Vector3.ProjectOnPlane(pp_center, normal);
+
+		Debug.DrawLine(p1, p2, Color.red, 99.0f);
+		Debug.DrawLine(p2, p3, Color.red, 99.0f);
+		Debug.DrawLine(p1, p3, Color.red, 99.0f);
+/* 		Debug.DrawRay(m12, pp12, Color.red, 99.0f);
+		Debug.DrawRay(m13, pp13, Color.red, 99.0f); */
+		// Debug.DrawRay(pp_center, normal, Color.green, 99.0f);
+		Debug.DrawRay(center, normal, Color.green, 99.0f);
+
+		return center;
+	}
+
+	public static Vector3[] GetSuperTriangle(List<Vector3> points)
+	{
+		Vector3 left = points[0];
+		Vector3 top = left;
+		Vector3 bottom = left;
+		Vector3 right = left;
+		float average_y = 0.0f;
+
+		foreach(Vector3 p in points)
+		{
+			average_y += p.y;
+
+			if(p.x < left.x)
+				left = p;
+			else if(p.x > right.x)
+				right = p;
+
+			if(p.z > top.z)
+				top = p;
+			else if(p.z < top.z)
+				bottom = p;
+
+			average_y += p.y;
+		}
+
+		average_y = average_y / points.Count;
+		float x_center = (left.x + right.x)/2.0f;
+		float z_center = (bottom.z + top.z)/2.0f;
+
+		float side = Mathf.Abs(left.x - right.x);
+		float side_v = Mathf.Abs(top.x - bottom.x);
+		float d = side > side_v ? side : side_v;
+		Vector3 a = new Vector3(x_center - d*2, average_y, z_center - 1.5f*d);
+		Vector3 b = new Vector3(x_center + d*2, average_y, z_center - 1.5f*d);
+		Vector3 c = new Vector3(x_center, average_y, z_center + 1.5f*d);
+
+		return new Vector3[]{a,b,c};
+	}
 }
 
 public class Point : IComparable<Point>
@@ -132,5 +321,130 @@ public class Point : IComparable<Point>
 		if(Mathf.Abs(this.Pos.x - other.Pos.x) < 0.05f)
 			return this.Pos.z < other.Pos.z ? -1 : 1;
 		return this.Pos.x < other.Pos.x ? -1 : 1;
+	}
+}
+
+public class Triangle
+{
+	public Vector3 A;
+	public Vector3 B;
+	public Vector3 C;
+
+	public Vector3[] Points{
+		get{
+			if(_points == null)
+				_points = new Vector3[]{A,B,C};
+			return _points;
+		}
+	}
+
+	private Vector3[] _points;
+
+	private Vector3 _center;
+	private float _radius;
+
+	public Triangle(Vector3 a, Vector3 b, Vector3 c)
+	{
+		A = a; B = b; C=c;
+	}
+
+	public float Radius()
+	{
+		if(_radius <= 0.0f)
+		{
+			_radius = (GetCenter() - A).magnitude;
+		}
+
+		return _radius;
+	}
+
+	public bool ShareEdge(Triangle tri)
+	{
+		int count = 0;
+		foreach(Vector3 p in this.Points)
+		{
+			foreach(Vector3 pt in tri.Points)
+			{
+				if(p == pt)
+					count++;
+			}
+		}
+
+		return count >= 2;
+	}
+
+	public bool Contains(Vector3 p)
+	{
+		return Vector3.Distance(GetCenter(), p) <= Radius();
+	}
+
+	public Vector3 GetCenter()
+	{
+		if(_center != default(Vector3))
+			return _center;
+
+		Vector3 center = Vector3.zero;
+		Vector3 normal = Vector3.Cross(A - B, A-C);
+
+		Vector3 m12 = (A + B)/2;
+		Vector3 m13 = (A + C)/2;
+
+		Vector3 pp12 = Vector3.Cross((B-A),normal);
+		Vector3 pp13 = Vector3.Cross((C-A),normal);
+
+		// Debug.DrawRay()
+		Vector3 two_direction_cross = Vector3.Cross(pp12, pp13);
+		float t = Vector3.Dot(Vector3.Cross((m13 - m12), pp13) , two_direction_cross) / two_direction_cross.sqrMagnitude;
+
+		// Vector3 pp_center = Vector3.Cross(m12 + pp12, m13 + pp13);
+		Vector3 pp_center = m12 + pp12 * t;
+		center = Vector3.ProjectOnPlane(pp_center, normal);
+
+		Debug.DrawLine(A, B, Color.red, 99.0f);
+		Debug.DrawLine(B, C, Color.red, 99.0f);
+		Debug.DrawLine(A, C, Color.red, 99.0f);
+/* 		Debug.DrawRay(m12, pp12, Color.red, 99.0f);
+		Debug.DrawRay(m13, pp13, Color.red, 99.0f); */
+		// Debug.DrawRay(pp_center, normal, Color.green, 99.0f);
+		Debug.DrawRay(center, normal, Color.green, 99.0f);
+
+		_center = center;
+		return _center;
+	}
+
+	public void DrawGizmo(Color c, float duration)
+	{
+		Debug.DrawLine(A,B, c, duration);
+		Debug.DrawLine(A,C, c, duration);
+		Debug.DrawLine(B,C, c, duration);
+	}
+
+	public Vector3 GetTheOther(Vector3[] points)
+	{
+		Vector3[] this_p = this.Points.OrderBy(x=>x.x).ToArray();
+		Vector3[] all_p = points.OrderBy(x=>x.x).ToArray();
+		for(int i=0;i<3;i++)
+		{
+			if(all_p[i] != this_p[i])
+				return all_p[i];
+		}
+		return all_p[3];
+	}
+}
+
+public class Edge
+{
+	public Vector3 A;
+	public Vector3 B;
+
+	public Edge(Vector3 a, Vector3 b)
+	{
+		A = a; B = b;
+	}
+
+	public bool SameWith(Edge e)
+	{
+		return (A == e.A && B == e.B)
+			|| (A == e.B && B == e.A);
 	}
 }
