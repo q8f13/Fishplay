@@ -17,7 +17,7 @@ public class Triangulator : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		int count = 10;
+		int count = 3;
 		_p = new List<Point>();
 
 		List<Vector3> points = new List<Vector3>();
@@ -101,15 +101,20 @@ public class Triangulator : MonoBehaviour {
 
 	public List<Triangle> TriangulatorBowyerWatson(List<Vector3> points)
 	{
-		Mesh msh = new Mesh();
-
-		// points = new List<Vector3>(points.OrderBy(x=>x.x));
+		// some special cases
+		if(points.Count < 3)
+			throw new Exception("It should be at least 3 or more points");
+		List<Triangle> tempTriangleList = new List<Triangle>();
+		if(points.Count == 3)
+		{
+			tempTriangleList.Add(new Triangle(points[0], points[1], points[2]));
+			return tempTriangleList;
+		}
 
 		Vector3[] supert = GetSuperTriangle(points);
 
 		// PrintPoints(points);
 		// List<Triangle> triangleList = new List<Triangle>();
-		List<Triangle> tempTriangleList = new List<Triangle>();
 
 		tempTriangleList.Add(new Triangle(supert[0], supert[1], supert[2]));
 
