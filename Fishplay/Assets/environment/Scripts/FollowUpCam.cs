@@ -24,8 +24,16 @@ public class FollowUpCam : MonoBehaviour
 	private float _fovRangeNormal = 60.0f;
 	private float _fovCurrentInterpolate = 0.0f;
 
+	[SerializeField]
+	private ShipParameter _shipParamPlay;
+
 	private ParticleChildControl _psOnTarget;
 	private UnitMotor _motor;
+	private UnitController _unitControl;
+
+	private Vector3 _weaponAimingPoint;			// 当前本体的武器瞄点。测试是否raycast到物体，如没有则由武器口到预瞄方向最大距离打射线
+
+	private Rayhit _rayHitControl;
 
 	void Start () {
 		_cam = GetComponent<Camera>();
@@ -36,8 +44,15 @@ public class FollowUpCam : MonoBehaviour
 
 		_psOnTarget = Target.GetComponent<ParticleChildControl>();
 		_motor = Target.GetComponent<UnitMotor>();
+		_unitControl = Target.GetComponent<UnitController>();
+
+		_rayHitControl = new Rayhit(_cam, LayerMask.GetMask("object"));
 	}
-	
+
+	private void Update() {
+		
+	}
+
 	// Update is called once per frame
 	void FixedUpdate () {
 		// tracking 
@@ -45,7 +60,7 @@ public class FollowUpCam : MonoBehaviour
 
 		if (_dir != default (Vector3))
 		{
-			float rotateSpeedInterpolated = Mathf.Lerp(FollowSpeedMin, FollowSpeed, (1.0f - _motor.SpeedRate));
+			float rotateSpeedInterpolated = Mathf.Lerp(FollowSpeedMin, FollowSpeed, (1.0f - _motor.SpeedPercent));
 //			_cam.transform.rotation = Quaternion.Slerp(_cam.transform.rotation, Quaternion.LookRotation(_dir, _cam.transform.up),
 //				Time.fixedDeltaTime*FollowSpeed);
 			_cam.transform.rotation = Quaternion.Slerp(_cam.transform.rotation, Quaternion.LookRotation(_dir, _cam.transform.up),
@@ -72,4 +87,25 @@ public class FollowUpCam : MonoBehaviour
 	{
 		_dir = dir;
 	}
+
+	private void OnDrawGizmos() {
+		if(_unitControl == null)
+			return;
+		Gizmos.color = Color.green;
+		// left weapon
+		Vector3 phit = _rayHitControl.GetTargetPoint(_unitControl.WeaponLeft, Input.mousePosition, _shipParamPlay.CurrentWeaponMaxRange);
+		Gizmos.DrawLine(_cam.transform.position, Target.position);
+		Gizmos.color = Color.red;
+		Gizmos.DrawLine(_unitControl.WeaponLeft.position, phit);
+		Gizmos.DrawWireSphere(phit, 0.1f);
+		Gizmos.color = Color.white;
+		Gizmos.DrawLine(_cam.transform.position, phit);
+
+	}
+}
+
+[System.Serializable]
+public class ShipParameter
+{
+	public float CurrentWeaponMaxRange = 280.0f;
 }

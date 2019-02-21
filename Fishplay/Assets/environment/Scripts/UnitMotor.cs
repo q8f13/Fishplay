@@ -35,7 +35,7 @@ public class UnitMotor : MonoBehaviour
 
 //	private FollowUpCam _cam;
 
-	public float SpeedRate { get { return _rigSpeed/_maxSpeedWithBoost; } }
+	public float SpeedPercent { get { return _rigSpeed/_maxSpeedWithBoost; } }
 
 	// Use this for initialization
 	void Start ()
@@ -74,7 +74,7 @@ public class UnitMotor : MonoBehaviour
 
 		targetQuat = rollQuat*targetQuat;
 
-		float rotateSpeedInterpolated = Mathf.Lerp(RotationSpeedMin, RotationSpeed, (1.0f - SpeedRate));
+		float rotateSpeedInterpolated = Mathf.Lerp(RotationSpeedMin, RotationSpeed, (1.0f - SpeedPercent));
 
 //		_rig.rotation =
 //			Quaternion.Slerp(_rig.rotation,

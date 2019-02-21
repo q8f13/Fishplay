@@ -26,7 +26,7 @@ RenderSettings:
   m_AmbientIntensity: 1
   m_AmbientMode: 0
   m_SubtractiveShadowColor: {r: 0.42, g: 0.478, b: 0.627, a: 1}
-  m_SkyboxMaterial: {fileID: 15303, guid: 0000000000000000f000000000000000, type: 0}
+  m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
   m_FlareFadeSpeed: 3
@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.29936957, g: 0.29936957, b: 0.29936957, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
@@ -216,6 +216,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 88d77721e4e92e64591e2a37585f29e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  WeaponLeft: {fileID: 1650516204}
+  WeaponRight: {fileID: 661049403}
   _mousePos: {x: 0, y: 0, z: 0}
 --- !u!114 &18403546
 MonoBehaviour:
@@ -348,7 +350,7 @@ GameObject:
   - component: {fileID: 661049405}
   - component: {fileID: 661049404}
   m_Layer: 0
-  m_Name: Sphere (1)
+  m_Name: SphereR
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3959,7 +3961,7 @@ GameObject:
   - component: {fileID: 1650516206}
   - component: {fileID: 1650516205}
   m_Layer: 0
-  m_Name: Sphere
+  m_Name: SphereL
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4156,7 +4158,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Count: 50
   RangeRadius: 100
-  ColliderOn: 0
+  ColliderOn: 1
   ScaleMax: 20
 --- !u!4 &2127183846
 Transform:

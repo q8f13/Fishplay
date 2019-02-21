@@ -8,6 +8,9 @@ using UnityEngine;
 [RequireComponent(typeof(UnitMotor))]
 public class UnitController : MonoBehaviour
 {
+	public Transform WeaponLeft;
+	public Transform WeaponRight;
+
 	private UnitMotor _motor;
 
 	[SerializeField] private Vector3 _mousePos;
@@ -58,7 +61,7 @@ public class UnitController : MonoBehaviour
 			return;
 
 		Gizmos.color = Color.white;
-		Gizmos.DrawWireSphere(_targetPt, 0.2f);
+		// Gizmos.DrawWireSphere(_targetPt, 0.2f);
 //		Ray r = Camera.main.ScreenPointToRay(_mousePos);
 //		float val = _cam.OffsetDistance * 4;
 //		Gizmos.DrawRay(Camera.main.transform.position, r.direction * val);
