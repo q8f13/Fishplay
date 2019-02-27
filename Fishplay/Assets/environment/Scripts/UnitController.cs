@@ -17,42 +17,73 @@ public class UnitController : MonoBehaviour
 
 	private FollowUpCam _cam;
 
+	private ParticleSystem _engineTail;
+	private ParticleSystem.ForceOverLifetimeModule _tailModule;
+	private ParticleSystem.MinMaxCurve _emitterValue;
+
 	private Vector3 _targetPt;
 
 	private ParticleChildControl _ps;
 
+	private Ray _ray;
+
 	void Start()
 	{
 		_motor = GetComponent<UnitMotor>();
-		_cam = Camera.main.GetComponent<FollowUpCam>();
+		_cam = Camera.main.GetComponentInParent<FollowUpCam>();
 		_ps = GetComponent<ParticleChildControl>();
 		_ps.Toggle(false);
+
+		_engineTail = transform.Find("engineTail").GetComponent<ParticleSystem>();
+		_tailModule = _engineTail.forceOverLifetime;
+		_emitterValue = _tailModule.z;
 	}
 
-	// Update is called once per frame
-	void FixedUpdate ()
+	void UpdateTailFx(float percent)
 	{
+		_emitterValue.constant = Mathf.Lerp(0.0f, -1.0f, percent);
+		_tailModule.z = _emitterValue;
+	}
+
+	private void Update() {
 		_mousePos = Input.mousePosition;
 		// change mouse offset to target forward dir
 		// pivot to screen center
 		// calc offset
-		_mousePos.x = Mathf.Clamp(_mousePos.x, 0, Screen.width);
-		_mousePos.y = Mathf.Clamp(_mousePos.y, 0, Screen.height);
-		Ray r = Camera.main.ScreenPointToRay(_mousePos);
-		float val = _cam.OffsetDistance * 2.0f;
-		_targetPt = _cam.transform.position + r.direction*val;
+		// _mousePos.x = Mathf.Clamp(_mousePos.x, 0, Screen.width);
+		// _mousePos.y = Mathf.Clamp(_mousePos.y, 0, Screen.height);
+		// _mousePos.z = _cam.Cam.nearClipPlane;
+		_ray = Camera.main.ScreenPointToRay(_mousePos);
+
+		float val = _cam.OffsetDistance * 100.0f;
+		_targetPt = _cam.transform.position + _ray.direction*val;
 
 		Vector3 dirToGo = (_targetPt - transform.position).normalized;
 
 		// speedup motor
-		_cam.SetTargetForward(r.direction);
-		_motor.ChangeForward(dirToGo);
+		_cam.SetTargetForward(_ray.direction);
+
+		_motor.ChangeForward(_cam.MouseAim().forward, _cam.CameraRigUp());
+		// _motor.ChangeForward(_cam.MouseAimPos());
 		_motor.SpeedUp(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"));
+		// _motor.ChangeForward(dirToGo);
 		bool boostUpOn = Input.GetKey(KeyCode.LeftShift);
 		// _ps.Toggle(boostUpOn);
 		if(Input.GetKey(KeyCode.LeftShift))
 			_ps.Emit();
 		_motor.BoostUp(boostUpOn);
+
+		UpdateTailFx(_motor.ThrottlePercent);
+	}
+
+	private void LateUpdate() {
+		// Debug.DrawRay(_ray.origin, _ray.direction * 10.0f, Color.green);
+		// Debug.DrawRay(transform.position, _ray.direction * 10.0f, Color.red);
+	}
+
+	// Update is called once per frame
+	void FixedUpdate ()
+	{
 	}
 
 	void OnDrawGizmos()

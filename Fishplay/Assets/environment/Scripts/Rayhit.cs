@@ -1,6 +1,7 @@
 using UnityEngine;
 
 public class Rayhit {
+	public const string LAYER_CAN_RAY_HIT = "object";
 	private RaycastHit _hit;
 	private RaycastHit _weaponHit;
 	private Camera _cam;

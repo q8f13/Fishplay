@@ -24,7 +24,7 @@ public class GenerateRandomCubes : MonoBehaviour
 			g.transform.localScale = Random.value*Vector3.one * ScaleMax;
 			g.transform.position = RandomRange(-RangeRadius, RangeRadius);
 			g.GetComponent<BoxCollider>().enabled = ColliderOn;
-			g.layer = LayerMask.NameToLayer("object");
+			g.layer = LayerMask.NameToLayer(Rayhit.LAYER_CAN_RAY_HIT);
 			count--;
 		}
 	}
