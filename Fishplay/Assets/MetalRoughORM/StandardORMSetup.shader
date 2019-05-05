@@ -43,10 +43,9 @@
 			fixed4 c = tex2D (_MainTex, IN.uv_MainTex) * _Color;
 			float4 orm = tex2D(_ORMMap, IN.uv_MainTex);
 			o.Albedo = c.rgb;
-			o.Normal = UnpackNormal(tex2D(_NormalMap, IN.uv_MainTex));
-			// Metallic and smoothness come from slider variables
-			// o.Metallic = _Metallic;
-			// o.Smoothness = _Glossiness;
+			float4 normal_raw = tex2D(_NormalMap, IN.uv_MainTex);
+			normal_raw.g = saturate(1.0 - normal_raw.g);
+			o.Normal = UnpackNormal(normal_raw);
 			o.Occlusion = orm.r;
 			o.Smoothness = (1.0 - orm.g) * _Specular;
 			o.Metallic = orm.b;
