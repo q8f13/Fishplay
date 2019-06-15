@@ -28,10 +28,12 @@ public class UnitMotor : MonoBehaviour
 	[SerializeField, Header("引擎推力。水平垂直前后四个值")]
 	private Vector4 _enginePower = new Vector4(2.5f, 1.2f, 5.0f, 0.2f);
 
+	private Vector2 _currInput;
+
 	private float _startDrag = 0.0f;
 
 	// TODO: 临时值
-	private float _boosterForce = 50.0f;
+	private float _boosterForce = 20.0f;
 	private float _maxSpeedWithBoost = 100.0f;
 
 	[Header("Input")]
@@ -69,6 +71,9 @@ public class UnitMotor : MonoBehaviour
 
 	public void SpeedUp(float xInput, float yInput)
 	{
+		_currInput.x = xInput;
+		_currInput.y = yInput;
+
 		// natural slowing. for gameplay purposes not realistic
 		throttle += yInput * throttleSpeed * Time.fixedDeltaTime;
 		throttle = Mathf.Clamp(throttle, minThrottle, maxThrottle);
@@ -131,6 +136,10 @@ public class UnitMotor : MonoBehaviour
 		// 		1 - Mathf.Exp(-rotateSpeedInterpolated * Time.deltaTime));
 	}
 
+	private void OnGUI() {
+		GUI.Label(new Rect(0,0,100,60), string.Format("input {0:F2}, {1:F2}", _currInput.x, _currInput.y));
+	}
+
 	void RunPilot(Vector3 fly_dir_local, out float yaw, out float pitch, out float roll)
 	{
 		yaw = Mathf.Clamp(fly_dir_local.x, -1f, 1f);
@@ -140,11 +149,11 @@ public class UnitMotor : MonoBehaviour
 	}	
 
 	private void FixedUpdate() {
-/* 		_rig.AddRelativeForce(-Vector3.forward*throttle*forceMult, ForceMode.Force);
+ 		_rig.AddRelativeForce(-Vector3.forward*throttle*forceMult, ForceMode.Force);
 		_rig.AddRelativeTorque(new Vector3(turnTorque.x * _pitch
 											, turnTorque.y * _yaw
 											, -turnTorque.z * _roll) * forceMult, ForceMode.Force);
- */	}
+ 	}
 
 	public void BoostUp(bool on)
 	{
