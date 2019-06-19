@@ -240,7 +240,7 @@ MonoBehaviour:
   _yaw: 0
   _roll: 0
   turnTorque: {x: 90, y: 25, z: 45}
-  forceMult: 1000
+  forceMult: 1
   _rigSpeed: 0
   _euler_x_offset: 0
 --- !u!114 &18403547
