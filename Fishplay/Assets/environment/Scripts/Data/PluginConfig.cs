@@ -77,3 +77,12 @@ public enum StockIO
 	Core = 2,			// for perk unlocking and filling
 	Bounty = 4,			// increases with kill count, leads to more hunters and cops
 }
+
+public enum CargoType
+{
+	Unknown = 0,
+	Weapon,
+	Charged,
+	Mod,
+	Quest,
+}
