@@ -57,7 +57,7 @@ public class WeaponConfig : IConfig
 
 	public Sprite Icon()
 	{
-		return null;
+		return UIRigging.Instance.DummyIcon;
 	}
 
 	public string TextOutput()

@@ -2,6 +2,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class UIRigging : MonoBehaviour {
+	private static UIRigging _instance;
+	public static UIRigging Instance{get{return _instance;}}
+
 	public ItemBlock[] Weapons;
 	public ItemBlock[] Consumables;
 	public ItemBlock[] Mods;
@@ -24,6 +27,15 @@ public class UIRigging : MonoBehaviour {
 	public IConfig GetItem(string id)
 	{
 		return _itemRegister[id];
+	}
+
+	[SerializeField]
+	private Sprite _dummyIcon;
+	public Sprite DummyIcon{get{return _dummyIcon;}}
+
+	private void Awake()
+	{
+		_instance = this;
 	}
 
 	private void Start() {
