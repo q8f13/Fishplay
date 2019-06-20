@@ -14,6 +14,14 @@ public class SocketSet
 {
 	public SocketField Field = SocketField.Notset;
 	public PluginConfig PluginOnSet = null;
+
+	public static SocketSet CreateDummy()
+	{
+		SocketSet s = new SocketSet();
+		s.Field = (SocketField)Random.Range(0, 5);
+		s.PluginOnSet = null;
+		return s;
+	}
 }
 
 [System.Serializable]

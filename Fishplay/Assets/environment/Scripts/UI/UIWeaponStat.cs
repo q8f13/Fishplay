@@ -11,14 +11,28 @@ public class UIWeaponStat : MonoBehaviour {
 	public WeaponConfig DebugOnlyDataAsset;
 
 	private string _dataRaw;
+	private bool _visible = false;
 
 	private void Start()
 	{
 	}
 
-	public void UpdateStat(WeaponConfig data)
+	void Toggle(bool on)
 	{
-		string class_raw = "";
+		gameObject.SetActive(on);
+	}
+
+	public void UpdateStat(IConfig data)
+	{
+		if(data == null)
+		{
+			Toggle(false);
+			return;
+		}
+
+		Toggle(true);
+
+/* 		string class_raw = "";
 		for(int i=0;i<data.CompatibleTypes.Length;i++)
 		{
 			if (i > 0)
@@ -31,9 +45,16 @@ public class UIWeaponStat : MonoBehaviour {
 			, data.Description
 			, class_raw
 			, GetFireRate(data.FireInterval)
-			, data.EnegryDrain);
+			, data.EnegryDrain); */
 		
-		WeaponStatPad.text = _dataRaw;
+		WeaponStatPad.text = data.TextOutput();
+	}
+
+	private void Update() {
+		if(!_visible)
+			return;
+
+		Vector3 mp = Input.mousePosition;
 	}
 
 	public static int GetFireRate(float fire_interval)
