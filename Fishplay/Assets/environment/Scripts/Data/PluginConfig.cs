@@ -14,6 +14,14 @@ public class SocketSet
 {
 	public SocketField Field = SocketField.Notset;
 	public PluginConfig PluginOnSet = null;
+
+	public static SocketSet CreateDummy()
+	{
+		SocketSet s = new SocketSet();
+		s.Field = (SocketField)Random.Range(0, 5);
+		s.PluginOnSet = null;
+		return s;
+	}
 }
 
 [System.Serializable]
@@ -76,4 +84,13 @@ public enum StockIO
 	Scrap = 1,			// for item crafting, even trade
 	Core = 2,			// for perk unlocking and filling
 	Bounty = 4,			// increases with kill count, leads to more hunters and cops
+}
+
+public enum CargoType
+{
+	Unknown = 0,
+	Weapon,
+	Charged,
+	Mod,
+	Quest,
 }
