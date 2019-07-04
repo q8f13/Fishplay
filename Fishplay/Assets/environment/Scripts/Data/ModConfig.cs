@@ -9,6 +9,7 @@ public class ModConfig : IConfig
 	public string ID = null;
 
 	public SocketSet SocketSuit = null;
+	private Sprite _currIcon;
 
 	public static ModConfig CreateDummy()
 	{
@@ -25,7 +26,9 @@ public class ModConfig : IConfig
 
 	public Sprite Icon()
 	{
-		return UIRigging.Instance.DummyIcon;
+		if(_currIcon == null)
+			_currIcon = UIRigging.Instance.DummyIcon;
+		return _currIcon;
 	}
 
 	public string TextOutput()

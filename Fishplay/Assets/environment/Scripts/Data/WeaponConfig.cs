@@ -18,6 +18,8 @@ public class WeaponConfig : IConfig
 
 	public SocketSet[] Sockets = null;
 
+	private Sprite _currIcon;
+
 	public static WeaponConfig CreateDummy()
 	{
 		WeaponConfig cfg = new WeaponConfig();
@@ -37,7 +39,9 @@ public class WeaponConfig : IConfig
 
 	public Sprite Icon()
 	{
-		return UIRigging.Instance.DummyIcon;
+		if(_currIcon == null)
+			_currIcon = UIRigging.Instance.DummyIcon;
+		return _currIcon;
 	}
 
 	public string TextOutput()
