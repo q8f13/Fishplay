@@ -5,6 +5,9 @@ public class UIRigging : MonoBehaviour {
 	private static UIRigging _instance;
 	public static UIRigging Instance{get{return _instance;}}
 
+	[SerializeField]
+	private Sprite[] DebugIcons;
+
 	public ItemBlock[] Weapons;
 	public ItemBlock[] Consumables;
 	public ItemBlock[] Mods;
@@ -29,9 +32,7 @@ public class UIRigging : MonoBehaviour {
 		return _itemRegister[id];
 	}
 
-	[SerializeField]
-	private Sprite _dummyIcon;
-	public Sprite DummyIcon{get{return _dummyIcon;}}
+	public Sprite DummyIcon{get{return DebugIcons[Random.Range(0,10)];}}
 
 	private void Awake()
 	{
@@ -52,7 +53,10 @@ public class UIRigging : MonoBehaviour {
 		while(rnd_count > 0)
 		{
 			IConfig cc = null;
-			cc = WeaponConfig.CreateDummy();
+			if(Random.value > 0.5f)
+				cc = WeaponConfig.CreateDummy();
+			else
+				cc = ModConfig.CreateDummy();
 /* 			if(Random.value > 0.5f)
 			{
 			}
@@ -103,6 +107,25 @@ public class UIRigging : MonoBehaviour {
 			_floatingPanel.UpdateStat(GetItem(id));
 		}
 	}
+
+    public static string GenerateName(int len)
+    { 
+        System.Random r = new System.Random();
+        string[] consonants = { "b", "c", "d", "f", "g", "h", "j", "k", "l", "m", "l", "n", "p", "q", "r", "s", "sh", "zh", "t", "v", "w", "x" };
+        string[] vowels = { "a", "e", "i", "o", "u", "ae", "y" };
+        string Name = "";
+        Name += consonants[r.Next(consonants.Length)].ToUpper();
+        Name += vowels[r.Next(vowels.Length)];
+        int b = 2; //b tells how many times a new letter has been added. It's 2 right now because the first two letters are already in the name.
+        while (b < len)
+        {
+            Name += consonants[r.Next(consonants.Length)];
+            b++;
+            Name += vowels[r.Next(vowels.Length)];
+            b++;
+        }
+        return Name;
+    }
 }
 
 public interface IConfig {
