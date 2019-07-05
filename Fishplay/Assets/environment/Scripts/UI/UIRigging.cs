@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,9 +10,9 @@ public class UIRigging : MonoBehaviour {
 	[SerializeField]
 	private Sprite[] DebugIcons;
 
-	public List<ItemBlock> Weapons;
-	public List<ItemBlock> Consumables;
-	public List<ItemBlock> Mods;
+	public EquipementSlot<ItemBlock> Weapons;
+	public EquipementSlot<ItemBlock> Consumables;
+	public EquipementSlot<ItemBlock> Mods;
 
 	public List<ItemBlock> Loots;
 	// public UIConsumableSocket[] Consumables;
@@ -62,11 +63,11 @@ public class UIRigging : MonoBehaviour {
 		_instance = this;
 	}
 
-	private void ExtractItem(string id, ItemBlock item)
+	private void UnequipItem(string id, ItemBlock item)
 	{
 		// IConfig data = GetItem(id);
 		BlockType type = item.Type;
-		List<ItemBlock> from = null;
+		EquipementSlot<ItemBlock> from = null;
 		switch(type)
 		{
 			case BlockType.Weapon:
@@ -90,21 +91,9 @@ public class UIRigging : MonoBehaviour {
 
 	private void Start() {
 		// init blocks
-		foreach(ItemBlock b in Weapons)
-		{
-			b.OnItemHoverAction = ShowFloatingPanel;
-			b.OnItemClickedAction = ExtractItem;
-		}
-		foreach(ItemBlock b in Consumables)
-		{
-			b.OnItemHoverAction = ShowFloatingPanel;
-			b.OnItemClickedAction = ExtractItem;
-		}
-		foreach(ItemBlock b in Mods)
-		{
-			b.OnItemHoverAction = ShowFloatingPanel;
-			b.OnItemClickedAction = ExtractItem;
-		}
+		Weapons = new EquipementSlot<ItemBlock>(2, null);
+		Consumables = new EquipementSlot<ItemBlock>(4, null);
+		Mods = new EquipementSlot<ItemBlock>(12, null);
 
 		// create and import debug data 
 		int rnd_count = Random.Range(6,20);
@@ -153,27 +142,23 @@ public class UIRigging : MonoBehaviour {
 	private void TryEquipItem(string id, ItemBlock item)
 	{
 		// IConfig data = GetItem(id);
-		List<ItemBlock> tar_arr = null;
-		int count_limit = -1;
+		EquipementSlot<ItemBlock> tar_arr = null;
 		Transform slot = null;
 		Transform switcher_slot = null;
 		switch(item.Type)
 		{
 			case BlockType.Weapon:
 				tar_arr = Weapons;
-				count_limit = 2;
 				slot = _weaponContainer;
 				switcher_slot = _weaponSwitchSlot;
 				break;
 			case BlockType.Mods:
 				tar_arr = Mods;
-				count_limit = 12;
 				slot = _modContainer;
 				switcher_slot = _modSwitchSlot;
 				break;
 			case BlockType.Consumable:
 				tar_arr = Consumables;
-				count_limit = 4;
 				slot = _consumableContainer;
 				switcher_slot = _consumableSwitchSlot;
 				break;
@@ -182,13 +167,13 @@ public class UIRigging : MonoBehaviour {
 		}
 
 		// equip on directly
-		if(tar_arr.Count < count_limit)
+		if(!tar_arr.IsFull)
 		{
 			// item.DoUpdate(data);
-			tar_arr.Add(item);
+			tar_arr.AddElem(item);
 			Loots.Remove(item);
 			item.transform.SetParent(slot);
-			item.OnItemClickedAction = ExtractItem;
+			item.OnItemClickedAction = UnequipItem;
 
 			LayoutRebuilder.ForceRebuildLayoutImmediate(slot.GetComponent<RectTransform>());
 		}
@@ -236,13 +221,15 @@ public class UIRigging : MonoBehaviour {
 		_consumableSwitchSlot.parent.gameObject.SetActive(_consumableSwitchSlot == targetSlot);
 	}
 
-	private void GenerateContainerSnapshoto(ItemBlock candidate, List<ItemBlock> blocks, Transform blocks_slot, Transform switcher_slot)
+	private void GenerateContainerSnapshoto(ItemBlock candidate, EquipementSlot<ItemBlock> blocks, Transform blocks_slot, Transform switcher_slot)
 	{
 		_switchPanel.gameObject.SetActive(true);
 		ShowSwitchSubPanel(switcher_slot);
 		ClearAllChilds(switcher_slot);
-		foreach(ItemBlock block in blocks)
+		foreach(ItemBlock block in blocks.Data)
 		{
+			if(block == null)
+				continue;
 			GameObject snapshot = Instantiate(block.gameObject);
 			snapshot.transform.SetParent(switcher_slot);
 			ItemBlock ib = snapshot.GetComponent<ItemBlock>();
@@ -250,14 +237,16 @@ public class UIRigging : MonoBehaviour {
 			{
 				blocks.Remove(block);
 				Loots.Add(block);
-				blocks.Add(candidate);
+				blocks.AddElem(candidate);
 				Loots.Remove(candidate);
+				int child_idx = block.transform.GetSiblingIndex();
 				block.transform.SetParent(_lootContainer);
 				candidate.transform.SetParent(blocks_slot);
+				candidate.transform.SetSiblingIndex(child_idx);
 				switcher_slot.parent.gameObject.SetActive(false);
 				_switchPanel.gameObject.SetActive(false);
 				block.OnItemClickedAction = TryEquipItem;
-				candidate.OnItemClickedAction = ExtractItem;
+				candidate.OnItemClickedAction = UnequipItem;
 				LayoutRebuilder.ForceRebuildLayoutImmediate(_lootContainer.GetComponent<RectTransform>());
 				LayoutRebuilder.ForceRebuildLayoutImmediate(blocks_slot.GetComponent<RectTransform>());
 			};
@@ -308,4 +297,75 @@ public interface IConfig {
 	string TextOutput();
 	string GetName();
 	Sprite Icon();
+}
+
+public class EquipementSlot<T> where T : Object
+{
+	public T[] Data;
+	public bool IsFull{get{return _currIdx >= Data.Length;}}
+	public int Count{get{return Data.Length;}}
+
+	private int _currIdx = 0;
+	private int _enumIdx = 0;
+
+	private System.Action<T> _OnFullReminderAction;
+
+	public void AddElem(T obj)
+	{
+		if(_currIdx >= Data.Length)
+		{
+			if(_OnFullReminderAction != null)
+				_OnFullReminderAction(obj);
+			Debug.LogWarning("container's full");
+			return;
+		}
+
+		Data[_currIdx] = obj;
+		bool located = false;
+		for(int i=0;i<Data.Length;i++)
+		{
+			if(Data[i] == null)
+			{
+				_currIdx = i;
+				located = true;
+				break;
+			}
+		}
+
+		if(!located)
+			_currIdx = Data.Length;
+	}
+
+	public void SetElem(int index, T obj)
+	{
+		Data[index] = obj;
+		if(obj == null && _currIdx > index)
+			_currIdx = index;
+	}
+
+	public void Remove(T obj)
+	{
+		for(int i=0;i<Data.Length;i++)
+		{
+			if(Data[i] == obj)
+			{
+				SetElem(i, null);
+				break;
+			}
+		}
+	}
+
+	public T this[int index]
+	{
+		get
+		{
+			return Data[index];
+		}
+	}
+
+	public EquipementSlot(int count, System.Action<T> onFullHandler)
+	{
+		Data = new T[count];
+		_OnFullReminderAction = onFullHandler;
+	}
 }
