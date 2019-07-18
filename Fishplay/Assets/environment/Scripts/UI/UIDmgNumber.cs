@@ -25,7 +25,6 @@ public class UIDmgNumber : MonoBehaviour, ISpawner
         t.SetPoint(
             worldPos
             , Vector3.ProjectOnPlane((worldPos - _cam.transform.position).normalized, _cam.transform.forward)
-            , _cam
             , dmg.ToString()
             , crit);
     }

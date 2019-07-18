@@ -17,6 +17,9 @@ public class UIDmgNumberText : UnityEngine.UI.Text,  IPoolable
     private void Awake() {
         if(_rt == null)
             _rt = GetComponent<RectTransform>();
+
+        if(_cam == null)
+            _cam = Camera.main;
     }
 
 	public void Active()
@@ -49,12 +52,11 @@ public class UIDmgNumberText : UnityEngine.UI.Text,  IPoolable
         this.enabled = false;
 	}
 
-    public void SetPoint(Vector3 worldPos, Vector3 world_dir, Camera cam, string s, bool crit)
+    public void SetPoint(Vector3 worldPos, Vector3 world_dir, string s, bool crit)
     {
         this.text = s;
         _startWorldPos = worldPos;
         _currPos = _startWorldPos;
-        _cam = cam;
         _worldDir = world_dir;
     }
 }
