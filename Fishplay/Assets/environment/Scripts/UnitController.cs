@@ -31,6 +31,8 @@ public class UnitController : MonoBehaviour
 
 	private Ray _ray;
 
+	private LaserPointer _lp;
+
 	void Start()
 	{
 		_motor = GetComponent<UnitMotor>();
@@ -43,6 +45,8 @@ public class UnitController : MonoBehaviour
 		_emitterValue = _tailModule.z;
 
 		_tb = new TractionBeam(this.transform, _tractionBeamRange, CargoLootHandler);
+
+		_lp = GetComponentInChildren<LaserPointer>();
 	}
 
 	void CargoLootHandler(CargoData data)
@@ -87,6 +91,8 @@ public class UnitController : MonoBehaviour
 		UpdateTailFx(_motor.ThrottlePercent);
 
 		_tb.CheckLoots(LevelManager.Instance.LootsInScene);
+
+		_lp.SetMousePoint(Input.GetMouseButton(0), Input.mousePosition);
 	}
 
 	private void LateUpdate() {
