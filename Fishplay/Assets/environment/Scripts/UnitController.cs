@@ -33,6 +33,8 @@ public class UnitController : MonoBehaviour
 
 	private LaserPointer _lp;
 
+	private UIDmgNumber _dmgNumber;
+
 	void Start()
 	{
 		_motor = GetComponent<UnitMotor>();
@@ -47,6 +49,8 @@ public class UnitController : MonoBehaviour
 		_tb = new TractionBeam(this.transform, _tractionBeamRange, CargoLootHandler);
 
 		_lp = GetComponentInChildren<LaserPointer>();
+
+		_dmgNumber = FindObjectOfType<UIDmgNumber>();
 	}
 
 	void CargoLootHandler(CargoData data)
@@ -98,6 +102,10 @@ public class UnitController : MonoBehaviour
 	private void LateUpdate() {
 		// Debug.DrawRay(_ray.origin, _ray.direction * 10.0f, Color.green);
 		// Debug.DrawRay(transform.position, _ray.direction * 10.0f, Color.red);
+		if(_lp.bHit)
+		{
+			_dmgNumber.ShowDmgAtPos(_lp.GetPos, Random.Range(5,8));
+		}
 	}
 
 	// Update is called once per frame
