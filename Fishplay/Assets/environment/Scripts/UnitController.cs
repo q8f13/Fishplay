@@ -35,6 +35,9 @@ public class UnitController : MonoBehaviour
 
 	private UIDmgNumber _dmgNumber;
 
+	[SerializeField]
+	private UIWarningMsg _warningBoard;
+
 	void Start()
 	{
 		_motor = GetComponent<UnitMotor>();
@@ -97,6 +100,12 @@ public class UnitController : MonoBehaviour
 		_tb.CheckLoots(LevelManager.Instance.LootsInScene);
 
 		_lp.SetMousePoint(Input.GetMouseButton(0), Input.mousePosition);
+
+		if(Input.GetKeyUp(KeyCode.Backspace))
+		{
+			string msg = UIRigging.GenerateName(30);
+			_warningBoard.ShowMsg(msg, Random.Range(1.0f, 4.0f));
+		}
 	}
 
 	private void LateUpdate() {
