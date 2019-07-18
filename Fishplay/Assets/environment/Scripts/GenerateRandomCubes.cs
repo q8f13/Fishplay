@@ -13,20 +13,33 @@ public class GenerateRandomCubes : MonoBehaviour
 	public bool ColliderOn = false;
 	public float ScaleMax = 20.0f;
 
+	public bool CargoLootTest = false;
+	public GameObject CargoPrefab;
+
 	void Start ()
 	{
 		int count = Count;
 		while (count > 0)
 		{
-			GameObject g = GameObject.CreatePrimitive(PrimitiveType.Cube);
-			g.transform.parent = transform;
-			g.transform.rotation = Quaternion.Euler(RandomDegree(), RandomDegree(), RandomDegree());
-			g.transform.localScale = Random.value*Vector3.one * ScaleMax;
-			g.transform.position = RandomRange(-RangeRadius, RangeRadius);
-			g.GetComponent<BoxCollider>().enabled = ColliderOn;
+			GameObject g = SetupInstance(GameObject.CreatePrimitive(PrimitiveType.Cube),transform, true);
+			g.GetComponent<Collider>().enabled = ColliderOn;
 			g.layer = LayerMask.NameToLayer(Rayhit.LAYER_CAN_RAY_HIT);
+
+			if(CargoLootTest)
+				SetupInstance(GameObject.Instantiate(CargoPrefab), null, false);
 			count--;
 		}
+	}
+
+	GameObject SetupInstance(GameObject g, Transform parent_t, bool setScale)
+	{
+		if(parent_t != null)
+			g.transform.parent = parent_t;
+		g.transform.rotation = Quaternion.Euler(RandomDegree(), RandomDegree(), RandomDegree());
+		if(setScale)
+			g.transform.localScale = Random.value*Vector3.one * ScaleMax;
+		g.transform.position = RandomRange(-RangeRadius, RangeRadius);
+		return g;
 	}
 
 	float RandomDegree()

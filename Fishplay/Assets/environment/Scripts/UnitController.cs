@@ -25,6 +25,10 @@ public class UnitController : MonoBehaviour
 
 	private ParticleChildControl _ps;
 
+	[SerializeField, Header("Traction Beam Range")]
+	private float _tractionBeamRange = 25.0f;
+	private TractionBeam _tb;
+
 	private Ray _ray;
 
 	void Start()
@@ -37,6 +41,13 @@ public class UnitController : MonoBehaviour
 		_engineTail = transform.Find("engineTail").GetComponent<ParticleSystem>();
 		_tailModule = _engineTail.forceOverLifetime;
 		_emitterValue = _tailModule.z;
+
+		_tb = new TractionBeam(this.transform, _tractionBeamRange, CargoLootHandler);
+	}
+
+	void CargoLootHandler(CargoData data)
+	{
+		Debug.LogFormat("Get Loot | ID:{0} | Category: {1} | Count: {2}", data.ID, data.Category, data.Count);
 	}
 
 	void UpdateTailFx(float percent)
@@ -74,6 +85,8 @@ public class UnitController : MonoBehaviour
 		_motor.BoostUp(boostUpOn);
 
 		UpdateTailFx(_motor.ThrottlePercent);
+
+		_tb.CheckLoots(LevelManager.Instance.LootsInScene);
 	}
 
 	private void LateUpdate() {

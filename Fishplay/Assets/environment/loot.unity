@@ -44,7 +44,7 @@ RenderSettings:
 LightmapSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 11
-  m_GIWorkflowMode: 0
+  m_GIWorkflowMode: 1
   m_GISettings:
     serializedVersion: 2
     m_BounceScale: 1
@@ -424,9 +424,6 @@ MonoBehaviour:
   - {fileID: 21300014, guid: 143d274c743050445b68d64bf4ccd041, type: 3}
   - {fileID: 21300016, guid: 143d274c743050445b68d64bf4ccd041, type: 3}
   - {fileID: 21300018, guid: 143d274c743050445b68d64bf4ccd041, type: 3}
-  Weapons: []
-  Consumables: []
-  Mods: []
   Loots: []
   LootItemPrefab: {fileID: 355974859}
   _lootContainer: {fileID: 654107061}
