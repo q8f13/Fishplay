@@ -11,7 +11,7 @@ using UnityEngine;
 public class GeneratorData 
 {
     public int ID;
-    public string NameId;
+    public string Name;
     public GearEffect Effect;
     public Oper Operation;
     public ValueType Type;
@@ -21,6 +21,71 @@ public class GeneratorData
     public string Requirement;
     public string Description;
     public string Remarks;
+
+    public static GeneratorData Parse(GeneratorDataRaw raw)
+    {
+        GeneratorData data = new GeneratorData();
+        data.ID = raw.id;
+        data.Name = raw.name;
+        switch(raw.type)
+        {
+            case "dmg":
+                data.Effect = GearEffect.Damage;
+                break;
+            case "atk_rate":
+                data.Effect = GearEffect.AtkRate;
+                break;
+            case "en_cost":
+                data.Effect = GearEffect.EnergyCost;
+                break;
+            case "dmg_regen_en":
+                data.Effect = GearEffect.DmgRegenEnergy;
+                break;
+            case "kill_regen_en":
+                data.Effect = GearEffect.KillRegenEnergy;
+                break;
+            case "add_socket":
+                data.Effect = GearEffect.AddSocket;
+                break;
+            case "dmg_vs_inorganic":
+                data.Effect = GearEffect.DmgVsInorganic;
+                break;
+            case "dmg_vs_organic":
+                data.Effect = GearEffect.DmgVsOrganic;
+                break;
+            case "dmg_vs_shield":
+                data.Effect = GearEffect.DmgVsShield;
+                break;
+            case "thrust_rate":
+                data.Effect = GearEffect.PenetrationRate;
+                break;
+            case "free_ammo_cost":
+                data.Effect = GearEffect.FreeAmmoRate;
+                break;
+        }
+
+        if(raw.num_type == "pct")
+        {
+            data.Operation = Oper.AddPercent;
+            data.Type = ValueType.Percent;
+            data.Min = raw.min_pct / 100.0f;
+            data.Max = raw.max_pct / 100.0f;
+        }
+        else if(raw.num_type == "val")
+        {
+            data.Operation = Oper.AddVal;
+            data.Type = ValueType.Value;
+            data.Min = (int)raw.min_val;
+            data.Max = (int)raw.max_val;
+        }
+        else
+            throw new System.NotImplementedException();
+
+        data.Description = raw.desc;
+        data.Remarks = raw.remarks;
+
+        return data;
+    }
 }
 
 [System.Serializable]

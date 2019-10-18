@@ -1,0 +1,91 @@
+[
+  {
+    "id": 1000,
+    "type": "dmg",
+    "oper": "add",
+    "num_type": "pct",
+    "min_pct": 5,
+    "max_pct": 35,
+    "desc": "directDmg"
+  },
+  {
+    "id": 1001,
+    "type": "atk_rate",
+    "oper": "add",
+    "num_type": "pct",
+    "min_pct": 5,
+    "max_pct": 20
+  },
+  {
+    "id": 1002,
+    "type": "en_cost",
+    "oper": "reduce",
+    "num_type": "pct",
+    "min_pct": 20,
+    "max_pct": 50
+  },
+  {
+    "id": 1003,
+    "type": "dmg_regen_en",
+    "oper": "add",
+    "num_type": "pct",
+    "min_pct": 5,
+    "max_pct": 12
+  },
+  {
+    "id": 1004,
+    "type": "kill_regen_en",
+    "oper": "add",
+    "num_type": "val",
+    "min_val": 10,
+    "max_val": 50
+  },
+  {
+    "id": 1005,
+    "type": "add_socket",
+    "oper": "add",
+    "num_type": "val",
+    "min_val": 1,
+    "max_val": 4
+  },
+  {
+    "id": 1006,
+    "type": "dmg_vs_inorganic",
+    "oper": "add",
+    "num_type": "pct",
+    "min_pct": 20,
+    "max_pct": 50
+  },
+  {
+    "id": 1007,
+    "type": "dmg_vs_organic",
+    "oper": "add",
+    "num_type": "pct",
+    "min_pct": 20,
+    "max_pct": 50
+  },
+  {
+    "id": 1008,
+    "type": "dmg_vs_shield",
+    "oper": "add",
+    "num_type": "pct",
+    "min_pct": 10,
+    "max_pct": 25
+  },
+  {
+    "id": 1009,
+    "type": "thrust_rate",
+    "oper": "add",
+    "num_type": "pct",
+    "min_pct": 5,
+    "max_pct": 20
+  },
+  {
+    "id": 1010,
+    "type": "free_ammo_cost",
+    "oper": "add",
+    "num_type": "pct",
+    "min_pct": 1,
+    "max_pct": 5
+  }
+]

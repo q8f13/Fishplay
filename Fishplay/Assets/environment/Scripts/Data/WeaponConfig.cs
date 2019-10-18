@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class WeaponConfig : IConfig
 {
+	public const int DMG_BASE = 25;
+
 	public string Name = "NoName";
 	public string Description = "NoDescription";
 	public DmgType[] CompatibleTypes = new DmgType[]{DmgType.Kinetic, DmgType.Thermo};
